@@ -1,7 +1,8 @@
 import asyncio
 import os
 import logging
-from aiohttp import web
+
+from aiohttp.web_runner import AppRunner, TCPSite
 from dotenv import load_dotenv
 from src.bot import MusicStemsBot
 
@@ -68,16 +69,27 @@ async def start_webhook_mode(bot_instance: MusicStemsBot, webhook_url: str):
         await bot_instance.setup_webhook(full_webhook_url)
         logger.info(f"Webhook настроен на URL: {full_webhook_url}")
 
-        # Создание и запуск веб-приложения
+        # Создание приложения
         app = bot_instance.create_app()
         port = int(os.getenv('PORT', 8000))
 
-        logger.info(f"Запуск веб-сервера на порту {port}")
-        web.run_app(
-            app,
-            host="0.0.0.0",
-            port=port
-        )
+        # Создание runner'а вместо web.run_app()
+        runner = AppRunner(app)
+        await runner.setup()
+
+        site = TCPSite(runner, host="0.0.0.0", port=port)
+        await site.start()
+
+        logger.info(f"Веб-сервер запущен на порту {port}")
+
+        # Бесконечный цикл для поддержания работы сервера
+        try:
+            while True:
+                await asyncio.sleep(3600)  # Спим по часу
+        except KeyboardInterrupt:
+            logger.info("Получен сигнал остановки...")
+        finally:
+            await runner.cleanup()
 
     except Exception as e:
         logger.error(f"Ошибка в режиме webhook: {e}")
