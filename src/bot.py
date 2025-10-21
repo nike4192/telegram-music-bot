@@ -32,7 +32,10 @@ class MusicStemsBot:
     async def audio_handler(self, message: types.Message):
         audio_processor = None
         try:
-            await message.answer("Обрабатываю аудио... Это может занять несколько минут.")
+            await message.answer(
+                "Обрабатываю аудио... "
+                "Это может занять несколько минут."
+            )
 
             audio_processor = AudioProcessor()
 
