@@ -21,4 +21,4 @@ RUN poetry config virtualenvs.create false \
 COPY src/ ./src/
 COPY .env* ./
 
-CMD ["python", "-m", "src.bot"]
+CMD ["python", "-m", "main.bot"]

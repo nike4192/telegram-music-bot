@@ -71,7 +71,7 @@ cp .env.example .env
 
 4. **Запуск бота:**
 ```bash
-poetry run python -m src.bot
+poetry run python -m main.bot
 ```
 
 ### Запуск через Docker
