@@ -1,8 +1,9 @@
-import asyncio
 import os
 import logging
+from aiohttp import web
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from dotenv import load_dotenv
 from .audio_processor import AudioProcessor
 
@@ -63,14 +64,34 @@ class MusicStemsBot:
             if audio_processor:
                 audio_processor.cleanup_temp_files()
 
-    async def run(self):
+    async def start_polling(self):
         await self.dp.start_polling(self.bot)
 
+    async def setup_webhook(self, webhook_url: str):
+        """Настройка webhook"""
+        await self.bot.set_webhook(
+            url=webhook_url,
+            allowed_updates=["message"]
+        )
 
-async def main():
-    bot = MusicStemsBot()
-    await bot.run()
+    def create_app(self):
+        """Создание aiohttp приложения"""
+        app = web.Application()
 
+        # Настройка webhook handler
+        webhook_requests_handler = SimpleRequestHandler(
+            dispatcher=self.dp,
+            bot=self.bot
+        )
+        webhook_requests_handler.register(app, path="/webhook")
 
-if __name__ == '__main__':
-    asyncio.run(main())
+        # Health check endpoint
+        async def health_check(request):
+            return web.json_response({"status": "ok"}, status=200)
+
+        app.router.add_get("/health", health_check)
+
+        # Настройка приложения
+        setup_application(app, self.dp, bot=self.bot)
+
+        return app
