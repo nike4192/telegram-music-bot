@@ -54,7 +54,7 @@ telegram-music-bot/
 
 1. **Клонирование репозитория:**
 ```bash
-git clone https://github.com/your-username/telegram-music-bot.git
+git clone https://github.com/nike4192/telegram-music-bot.git
 cd telegram-music-bot
 ```
 
